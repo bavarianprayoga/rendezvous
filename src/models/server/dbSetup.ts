@@ -1,4 +1,4 @@
-import { db } from "../name"
+import { db } from "@/models/name"
 import createVenueCollection from "./venue.collection"
 import createHangoutCollection from "./hangout.collection"
 import createUserCollection from "./user.collection"

@@ -13,9 +13,7 @@ client
 const databases = new Databases(client)
 const avatars = new Avatars(client)
 const users = new Users(client)
-const profileStorage = new Storage(client)
-// const postStorage = new Storage(client)
-const venueStorage = new Storage(client)
+const storage = new Storage(client)
 
 // export { client, databases, avatars, users, profileStorage, postStorage, venueStorage }
-export { client, databases, avatars, users, profileStorage, venueStorage }
+export { client, databases, avatars, users, storage }

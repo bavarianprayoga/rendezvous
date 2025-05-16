@@ -1,18 +1,18 @@
-// store venue images/videos
+// store images/videos
 
 import { Permission } from "node-appwrite"
-import { venueBucket } from "@/models/name"
-import { venueStorage } from "../config"
+import { mediaBucket } from "@/models/name"
+import { storage } from "./config"
 
-export default async function setupVenueStorage() {
+export default async function setupStorage() {
     try {
-        await venueStorage.getBucket(venueBucket)
-        console.log("Venue bucket connected")
+        await storage.getBucket(mediaBucket)
+        console.log("Media bucket connected - mediaStorage.ts")
     } catch {
         try {
-            await venueStorage.createBucket(
-                venueBucket, 
-                venueBucket,
+            await storage.createBucket(
+                mediaBucket, 
+                mediaBucket,
                 [
                     Permission.read("any"),
                     Permission.write("users"),
@@ -25,9 +25,9 @@ export default async function setupVenueStorage() {
                 undefined,
                 ["jpg", "png", "gif", "jpeg", "webp", "heic", "heif", "mp4", "mov", "avi", "mkv", "webm"]
             )
-            console.log("Venue bucket created")
+            console.log("Media bucket created - mediaStorage.ts")
         } catch (error) {
-            console.error("Error creating venue bucket", error)
+            console.error("Error creating Media bucket - mediaStorage.ts", error)
             throw error
         }
     }

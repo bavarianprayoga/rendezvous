@@ -1,5 +1,6 @@
-import {IndexType, Permission} from "node-appwrite"
-import {db, venueCollection} from "../name"
+// import {IndexType, Permission} from "node-appwrite"
+import {Permission} from "node-appwrite"
+import {db, venueCollection} from "@/models/name"
 import {databases} from "./config"
 
 export default async function createVenueCollection() {
@@ -11,7 +12,7 @@ export default async function createVenueCollection() {
         Permission.update("users"),
         Permission.delete("users"),
     ])
-    console.log("Venue collection created")
+    console.log("Venue collection created - venue.collection.ts")
     
     // create attributes
     await Promise.all([
@@ -25,53 +26,53 @@ export default async function createVenueCollection() {
         databases.createStringAttribute(db, venueCollection, "typeTags", 100, false, undefined, true),
         databases.createIntegerAttribute(db, venueCollection, "groupSize", false, 1, 99),
     ])
-    console.log("Venue attributes created")
+    console.log("Venue attributes created - venue.collection.ts")
 
-    // create indexes
-    await Promise.all([
-        databases.createIndex(
-            db,
-            venueCollection,
-            "venueId",
-            IndexType.Unique,
-            ["venueId"]
-        ),
-        databases.createIndex(
-            db,
-            venueCollection,
-            "name",
-            IndexType.Fulltext,
-            ["name"]
-        ),
-        databases.createIndex(
-            db,
-            venueCollection,
-            "moodTags",
-            IndexType.Key,
-            ["moodTags"]
-        ),
-        databases.createIndex(
-            db,
-            venueCollection,
-            "occasionTags",
-            IndexType.Key,
-            ["occasionTags"]
-        ),
-        databases.createIndex(
-            db,
-            venueCollection,
-            "typeTags",
-            IndexType.Key,
-            ["typeTags"]
-        ),
-        databases.createIndex(
-            db,
-            venueCollection,
-            "groupSize",
-            IndexType.Key,
-            ["groupSize"]
-        )
-    ])
-    console.log("Venue indexes created")
+    // create indexes (somehow it's not working even though there's no error)
+    // await Promise.all([
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "venueId",
+    //         IndexType.Unique,
+    //         ["venueId"]
+    //     ),
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "name",
+    //         IndexType.Fulltext,
+    //         ["name"]
+    //     ),
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "moodTags",
+    //         IndexType.Key,
+    //         ["moodTags"]
+    //     ),
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "occasionTags",
+    //         IndexType.Key,
+    //         ["occasionTags"]
+    //     ),
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "typeTags",
+    //         IndexType.Key,
+    //         ["typeTags"]
+    //     ),
+    //     databases.createIndex(
+    //         db,
+    //         venueCollection,
+    //         "groupSize",
+    //         IndexType.Key,
+    //         ["groupSize"]
+    //     )
+    // ])
+    // console.log("Venue indexes created - venue.collection.ts")
 }
 
