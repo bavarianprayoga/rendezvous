@@ -8,40 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { MapPin, Calendar, Share2, Search, Users } from 'lucide-react'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/footer'
-
-// Mock venue data - Replace this with Appwrite database query
-const mockVenues = [
-  {
-    id: '1',
-    name: 'Skyline Rooftop Bar',
-    location: 'Downtown, 123 Main St',
-    description: 'Enjoy craft cocktails with panoramic city views at our stylish rooftop bar.',
-    image: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&h=600&fit=crop',
-    tags: ['Energetic', 'Romantic', 'Date Night'],
-    category: 'Rooftop',
-    upToNPeople: 8,
-  },
-  {
-    id: '2',
-    name: 'Cozy Corner Café',
-    location: 'Arts District, 456 Elm St',
-    description: 'A quiet café with comfortable seating, perfect for catching up with friends over coffee.',
-    image: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&h=600&fit=crop',
-    tags: ['Cozy', 'Quiet', 'Casual Meeting'],
-    category: 'Café',
-    upToNPeople: 4,
-  },
-  {
-    id: '3',
-    name: 'The Botanical Gardens',
-    location: 'Eastside Park, 789 Park Ave',
-    description: 'Lush gardens with walking paths, perfect for picnics and outdoor gatherings.',
-    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop',
-    tags: ['Chill', 'Elegant', 'Family'],
-    category: 'Park',
-    upToNPeople: 10,
-  },
-]
+import { fetchVenues, searchVenues, type Venue } from '@/lib/venues'
 
 // Popular categories
 const popularCategories = ['Cafés', 'Cozy spots', 'Date night', 'Rooftops']
@@ -50,32 +17,35 @@ export default function HomePage() {
   const [searchPlace, setSearchPlace] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
   const [groupSize, setGroupSize] = useState<number | ''>('')
-  const [filteredVenues, setFilteredVenues] = useState(mockVenues)
+  const [filteredVenues, setFilteredVenues] = useState<Venue[]>([])
+  const [allVenues, setAllVenues] = useState<Venue[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  // TODO: Replace with actual venue fetching from Appwrite
-  // useEffect(() => {
-  //   const fetchVenues = async () => {
-  //     try {
-  //       const response = await databases.listDocuments(
-  //         'YOUR_DATABASE_ID',
-  //         'YOUR_VENUES_COLLECTION_ID'
-  //       )
-  //       setFilteredVenues(response.documents)
-  //     } catch (error) {
-  //       console.error('Error fetching venues:', error)
-  //     }
-  //   }
-  //   fetchVenues()
-  // }, [])
+  // Fetch venues from Appwrite on component mount
+  useEffect(() => {
+    const loadVenues = async () => {
+      try {
+        setIsLoading(true)
+        const venues = await fetchVenues()
+        setAllVenues(venues)
+        setFilteredVenues(venues)
+      } catch (error) {
+        console.error('Error fetching venues:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadVenues()
+  }, [])
 
   // Filter venues based on search criteria
   useEffect(() => {
-    const filtered = mockVenues.filter(venue => {
+    const filtered = allVenues.filter((venue: Venue) => {
       // Place/venue name filter
       const placeMatch = !searchPlace || 
         venue.name.toLowerCase().includes(searchPlace.toLowerCase()) ||
         venue.description.toLowerCase().includes(searchPlace.toLowerCase()) ||
-        venue.tags.some(tag => tag.toLowerCase().includes(searchPlace.toLowerCase())) ||
+        venue.tags.some((tag: string) => tag.toLowerCase().includes(searchPlace.toLowerCase())) ||
         venue.category.toLowerCase().includes(searchPlace.toLowerCase())
       
       // Location filter
@@ -88,7 +58,7 @@ export default function HomePage() {
       return placeMatch && locationMatch && sizeMatch
     })
     setFilteredVenues(filtered)
-  }, [searchPlace, searchLocation, groupSize])
+  }, [searchPlace, searchLocation, groupSize, allVenues])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -190,9 +160,11 @@ export default function HomePage() {
             <div>
               <h2 className="text-3xl font-bold mb-2">Discover Hangout Spots</h2>
               <p className="text-muted-foreground">
-                {filteredVenues.length === mockVenues.length 
-                  ? "Places perfect for meeting friends and creating memories"
-                  : `Found ${filteredVenues.length} venue${filteredVenues.length !== 1 ? 's' : ''} matching your search`
+                {isLoading 
+                  ? "Loading venues..."
+                  : filteredVenues.length === allVenues.length 
+                    ? "Places perfect for meeting friends and creating memories"
+                    : `Found ${filteredVenues.length} venue${filteredVenues.length !== 1 ? 's' : ''} matching your search`
                 }
               </p>
             </div>
@@ -205,16 +177,45 @@ export default function HomePage() {
           </div>
 
           {/* Venue Cards */}
-          {filteredVenues.length > 0 ? (
+          {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredVenues.map((venue) => (
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden animate-pulse">
+                  <div className="h-48 bg-muted" />
+                  <CardHeader>
+                    <div className="h-4 bg-muted rounded w-3/4" />
+                    <div className="h-3 bg-muted rounded w-1/2" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-muted rounded" />
+                      <div className="h-3 bg-muted rounded w-4/5" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredVenues.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredVenues.map((venue: Venue) => (
                 <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative h-48">
-                    <img
-                      src={venue.image}
-                      alt={venue.name}
-                      className="w-full h-full object-cover"
-                    />
+                    {venue.image ? (
+                      <img
+                        src={venue.image}
+                        alt={venue.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          const target = e.target as HTMLImageElement
+                          target.src = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&h=600&fit=crop'
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <p className="text-muted-foreground">No image</p>
+                      </div>
+                    )}
                     <Badge className="absolute top-4 left-4" variant="secondary">
                       {venue.category}
                     </Badge>
@@ -235,7 +236,7 @@ export default function HomePage() {
                     <p className="text-sm text-muted-foreground mb-4">{venue.description}</p>
                     
                     <div className="flex flex-wrap gap-2">
-                      {venue.tags.map((tag) => (
+                      {venue.tags.map((tag: string) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -259,7 +260,10 @@ export default function HomePage() {
             <Card className="p-12 text-center">
               <h3 className="text-lg font-semibold mb-2">No venues found</h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your search criteria or group size
+                {allVenues.length === 0 
+                  ? "No venues have been added yet. Try adding some venues first!"
+                  : "Try adjusting your search criteria or group size"
+                }
               </p>
               <Button 
                 variant="outline" 

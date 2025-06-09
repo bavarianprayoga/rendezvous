@@ -20,7 +20,7 @@ export default async function createVenueCollection() {
         databases.createStringAttribute(db, venueCollection, "name", 100, true),
         databases.createStringAttribute(db, venueCollection, "location", 1000, true),
         databases.createStringAttribute(db, venueCollection, "description", 2000, false),
-        databases.createStringAttribute(db, venueCollection, "image", 256, false, undefined, true),
+        databases.createStringAttribute(db, venueCollection, "image", 256, false),
         databases.createStringAttribute(db, venueCollection, "moodTags", 100, false, undefined, true),
         databases.createStringAttribute(db, venueCollection, "occasionTags", 100, false, undefined, true),
         databases.createStringAttribute(db, venueCollection, "typeTags", 100, false, undefined, true),
