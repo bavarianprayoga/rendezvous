@@ -27,7 +27,7 @@ export interface AppwriteVenue {
 
 // Transform Appwrite venue data to frontend format
 export function transformVenue(appwriteVenue: AppwriteVenue): Venue {
-  // Combine all tags and get the first type tag as category
+  // Combine all tags from different categories
   const allTags = [
     ...(appwriteVenue.moodTags || []),
     ...(appwriteVenue.occasionTags || []),
@@ -123,11 +123,14 @@ export async function fetchVenues(): Promise<Venue[]> {
   }
 }
 
-// Search venues with filters
+// Enhanced search venues with comprehensive filters
 export async function searchVenues(
   searchPlace?: string,
   searchLocation?: string,
-  groupSize?: number
+  groupSize?: number,
+  occasion?: string,
+  mood?: string,
+  type?: string
 ): Promise<Venue[]> {
   try {
     // For now, we'll fetch all venues and filter client-side
@@ -149,10 +152,46 @@ export async function searchVenues(
       // Group size filter - venue must accommodate the group size
       const sizeMatch = !groupSize || venue.upToNPeople >= groupSize
 
-      return placeMatch && locationMatch && sizeMatch
+      // Tag-based filtering - check if venue has the selected tags
+      const occasionMatch = !occasion || venue.tags.includes(occasion)
+      const moodMatch = !mood || venue.tags.includes(mood)
+      const typeMatch = !type || venue.tags.includes(type)
+
+      return placeMatch && locationMatch && sizeMatch && occasionMatch && moodMatch && typeMatch
     })
   } catch (error) {
     console.error('Error searching venues:', error)
     return []
+  }
+}
+
+// Get all unique filter values for dropdowns
+export async function getFilterOptions(): Promise<{
+  occasions: string[]
+  moods: string[]
+  types: string[]
+  locations: string[]
+}> {
+  try {
+    const allVenues = await fetchVenues()
+    
+    // Extract filter options from your existing tags
+    const allTags = allVenues.flatMap(venue => venue.tags)
+    
+    // Define which tags belong to which categories based on your data
+    const occasionTags = ['Casual', 'Semi-formal']
+    const moodTags = ['Sports', 'Cozy', 'Chill']
+    const typeTags = ['Outdoor', 'Brunch', 'Cafe', 'Golf']
+    
+    // Filter available options based on what's actually in your data
+    const occasions = occasionTags.filter(tag => allTags.includes(tag))
+    const moods = moodTags.filter(tag => allTags.includes(tag))
+    const types = typeTags.filter(tag => allTags.includes(tag))
+    const locations = [...new Set(allVenues.map(v => v.location).filter(Boolean))]
+    
+    return { occasions, moods, types, locations }
+  } catch (error) {
+    console.error('Error getting filter options:', error)
+    return { occasions: [], moods: [], types: [], locations: [] }
   }
 } 

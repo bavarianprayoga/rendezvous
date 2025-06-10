@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { MapPin, Calendar, Share2, Search, Users } from 'lucide-react'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/footer'
+import VenueCard from '@/components/ui/venue-card'
 import { fetchVenues, searchVenues, type Venue } from '@/lib/venues'
 
 // Popular categories
@@ -198,62 +199,7 @@ export default function HomePage() {
           ) : filteredVenues.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVenues.map((venue: Venue) => (
-                <Card key={venue.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48">
-                    {venue.image ? (
-                      <img
-                        src={venue.image}
-                        alt={venue.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Fallback to placeholder if image fails to load
-                          const target = e.target as HTMLImageElement
-                          target.src = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&h=600&fit=crop'
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <p className="text-muted-foreground">No image</p>
-                      </div>
-                    )}
-                    <Badge className="absolute top-4 left-4" variant="secondary">
-                      {venue.category}
-                    </Badge>
-                    <Badge className="absolute top-4 right-4" variant="secondary">
-                      Up to {venue.upToNPeople} people
-                    </Badge>
-                  </div>
-                  
-                  <CardHeader>
-                    <CardTitle className="text-lg">{venue.name}</CardTitle>
-                    <CardDescription className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {venue.location}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">{venue.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {venue.tags.map((tag: string) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                  
-                  <CardFooter className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" className="text-primary">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Plan Hangout
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <VenueCard key={venue.id} venue={venue} />
               ))}
             </div>
           ) : (
@@ -281,7 +227,7 @@ export default function HomePage() {
           {/* View More */}
           {filteredVenues.length > 0 && (
             <div className="text-center mt-12">
-              <Button variant="link" className="text-primary">
+              <Button variant="link" className="text-primary" onClick={() => window.location.href = '/discover'}>
                 Explore more places →
               </Button>
             </div>
